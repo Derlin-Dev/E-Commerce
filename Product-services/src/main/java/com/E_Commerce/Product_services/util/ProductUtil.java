@@ -18,6 +18,7 @@ public class ProductUtil {
         return new ProductResponse(
                 product.getCode(),
                 product.getName(),
+                product.getPrice(),
                 product.getDescription(),
                 product.getStock()
         );
@@ -27,6 +28,7 @@ public class ProductUtil {
         return new Product(
                 code,
                 request.getName(),
+                request.getPrice(),
                 request.getDescription(),
                 request.getStock(),
                 category

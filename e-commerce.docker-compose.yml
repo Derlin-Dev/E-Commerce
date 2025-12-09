@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres_product:
     image: postgres:15
     container_name: postgres_container_product
     environment:
@@ -12,8 +12,21 @@ services:
       - postgres_product:/var/lib/postgresql/data
     restart: always
 
+  postgres_user:
+    image: postgres:15
+    container_name: postgres_container_user
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: user_DB
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_user:/var/lib/postgresql/data
+    restart: always
   
 
 volumes:
   postgres_product:
+  postgres_user:
   

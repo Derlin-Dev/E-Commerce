@@ -56,6 +56,7 @@ public class CategoryServices {
                 .map(product -> new ProductResponse(
                         product.getCode(),
                         product.getName(),
+                        product.getPrice(),
                         product.getDescription(),
                         product.getStock()
                 )).collect(Collectors.toList());

@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/e-commerce/api/v1")
+@RequestMapping("/e-commerce/api/v1/category")
 public class CategoryController {
 
     private final CategoryServices categoryServices;
@@ -16,7 +16,7 @@ public class CategoryController {
         this.categoryServices = categoryServices;
     }
 
-    @GetMapping("/getCategory")
+    @GetMapping("/get")
     public ResponseEntity<?> getAllCategory(){
         return null;
     }

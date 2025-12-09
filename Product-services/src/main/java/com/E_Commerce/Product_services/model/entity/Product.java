@@ -21,6 +21,7 @@ public class Product {
     private Long id;
     private String code;
     private String name;
+    private double price;
     private String description;
     private int stock;
 
@@ -31,9 +32,10 @@ public class Product {
     @JsonIgnore
     Category category;
 
-    public Product(String code, String name, String description, int stock, Category category) {
+    public Product(String code, String name, double price, String description, int stock, Category category) {
         this.code = code;
         this.name = name;
+        this.price = price;
         this.description = description;
         this.stock = stock;
         this.category = category;

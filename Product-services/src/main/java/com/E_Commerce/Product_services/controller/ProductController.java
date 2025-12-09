@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/e-commerce/api/v1")
+@RequestMapping("/e-commerce/api/v1/product")
 public class ProductController {
 
     private final ProductServices productServices;
@@ -22,14 +22,14 @@ public class ProductController {
     }
 
     //obtener todos los productos
-    @GetMapping("/product")
+    @GetMapping("/get")
     public ResponseEntity<?> getProducts(){
         List<ProductResponse> productResponses = productServices.getAllProduct();
         return ResponseEntity.status(HttpStatus.OK).body(productResponses);
     }
 
     //Obtener productos por su id
-    @GetMapping("/product/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<ProductResponse>getByIdProduct(@PathVariable Long id) throws ResourceNotFoundExceptions {
         ProductResponse response = productServices.getByIdProduct(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);

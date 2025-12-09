@@ -37,6 +37,7 @@ public class ProductServices {
                 .map(product -> new ProductResponse(
                         product.getCode(),
                         product.getName(),
+                        product.getPrice(),
                         product.getDescription(),
                         product.getStock()
                 )).collect(Collectors.toList());
@@ -64,6 +65,7 @@ public class ProductServices {
         Product product = new Product(
                 code,
                 request.getName(),
+                request.getPrice(),
                 request.getDescription(),
                 request.getStock(),
                 category
