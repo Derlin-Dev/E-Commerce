@@ -15,15 +15,15 @@ import java.util.List;
 @Service
 public class UserServices {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     private final UserRepository repository;
     private UserUtil userUtil;
 
     List<String> roles;
 
-    public UserServices(UserRepository repository, UserUtil userUtil) {
+    public UserServices(PasswordEncoder passwordEncoder, UserRepository repository, UserUtil userUtil) {
+        this.passwordEncoder = passwordEncoder;
         this.repository = repository;
         this.userUtil = userUtil;
     }

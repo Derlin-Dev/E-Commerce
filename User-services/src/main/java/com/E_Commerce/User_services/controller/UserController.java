@@ -20,9 +20,8 @@ public class UserController {
         this.userServices = userServices;
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(Authentication authentication) {
-        return ResponseEntity.ok("Bienvenido, tu correo es: " + authentication.getDetails());
+    public ResponseEntity<?> getProfile(@RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok("Bienvenido: " + userId);
     }
 }
