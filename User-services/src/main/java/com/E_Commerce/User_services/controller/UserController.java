@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestHeader("X-User-Id") String userId) {
+    public ResponseEntity<?> getProfile(@RequestHeader("X-User-Code") String userId) {
         return ResponseEntity.ok("Bienvenido: " + userId);
     }
 }

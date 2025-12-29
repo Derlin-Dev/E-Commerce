@@ -35,7 +35,15 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    //Obtener producto por codigo
+    @GetMapping("/getcode/{code}")
+    public ResponseEntity<ProductResponse> getByProductCode(@PathVariable String code) throws  ResourceNotFoundExceptions {
+        ProductResponse response = productServices.getProductByCode(code);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     //Crear un nuevo producto
+
     @PostMapping("/create")
     public ResponseEntity<?> registerNewProduct(@RequestBody ProductRequest request) throws ResourceNotFoundExceptions {
         Product product = productServices.createNewProduct(request);

@@ -1,0 +1,120 @@
+package com.E_Commerce.Cart_services.services;
+
+import com.E_Commerce.Cart_services.model.data.StatusCart;
+import com.E_Commerce.Cart_services.model.dto.ProductRequest;
+import com.E_Commerce.Cart_services.model.dto.ShoppingCartResponse;
+import com.E_Commerce.Cart_services.model.entity.ProductCart;
+import com.E_Commerce.Cart_services.model.entity.ShoppingCart;
+import com.E_Commerce.Cart_services.repository.ProductCartRepository;
+import com.E_Commerce.Cart_services.repository.ShoppingCartRepository;
+import com.E_Commerce.Cart_services.util.ShoppingCartUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+@Service
+public class ShoppingCarServices {
+
+    private final ShoppingCartRepository shoppingCartRepository;
+    private final ProductCartRepository productCartRepository;
+    private final RestTemplate restTemplate;
+    private final ShoppingCartUtil shoppingCartUtil;
+
+    private static String PRODUCT_SERVICE_GET = "https://PRODUCT-SERVICES/e-commerce/api/v1/product/getcode/";
+
+    public ShoppingCarServices(ShoppingCartRepository shoppingCartRepository, ProductCartRepository productCartRepository,
+                               RestTemplate restTemplate, ShoppingCartUtil shoppingCartUtil)
+    {
+        this.shoppingCartRepository = shoppingCartRepository;
+        this.productCartRepository = productCartRepository;
+        this.restTemplate = restTemplate;
+        this.shoppingCartUtil = shoppingCartUtil;
+    }
+
+    //Obtener carrito de compras de un usuario
+    public ShoppingCartResponse getShoppingCartByUser(String userCode) throws Exception {
+        Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findByUserCode(userCode);
+
+        if (shoppingCart.isEmpty()){
+            ShoppingCart sh = createNewShoppingCart(userCode);
+            return shoppingCartConvert(sh);
+        }
+
+        return shoppingCartConvert(shoppingCart.get());
+    }
+
+    public ShoppingCartResponse shoppingCartConvert(ShoppingCart sh){
+        return new ShoppingCartResponse(
+                sh.getUserCode(),
+                sh.getCartCode(),
+                sh.getStatus(),
+                sh.getCreateAt(),
+                sh.getUpdateAt(),
+                sh.getProductCartList()
+        );
+    }
+
+    //Crear nuevo carrito de compras
+    public ShoppingCart createNewShoppingCart(String userCode) throws Exception {
+
+        if (shoppingCartRepository.existsByUserCode(userCode)) {
+            throw new Exception("Carrito ya registrado");
+        }
+
+        String cartCode = shoppingCartUtil.generateShoppingCartCode("CART-");
+
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserCode(userCode);
+        shoppingCart.setCartCode(cartCode);
+        shoppingCart.setStatus(StatusCart.ACTIVE);
+        shoppingCart.setCreateAt(LocalDate.now());
+
+        return shoppingCartRepository.save(shoppingCart);
+    }
+
+
+    //Obtener el item del servicio de productos
+    public ProductRequest getProductByCode(String code){
+        String url = PRODUCT_SERVICE_GET + code;
+        return restTemplate.getForObject(url, ProductRequest.class);
+    }
+
+    //Agregar producto al carrito
+    public void addItem(String cartCode, String productCode, int quantity){
+
+        ShoppingCart shoppingCart = shoppingCartRepository.findByCartCode(cartCode)
+                .orElseThrow(() -> new RuntimeException("Carrito no encotrado"));
+
+        ProductRequest productRequest = getProductByCode(productCode);
+
+        if (productRequest == null){
+            throw new RuntimeException(("Producto no encotrado"));
+        }
+
+        double subTotal = productRequest.getPrice() * quantity;
+
+        try {
+            ProductCart productCart = new ProductCart(
+                    productRequest.getCode(),
+                    productRequest.getName(),
+                    productRequest.getPrice(),
+                    quantity,
+                    subTotal,
+                    shoppingCart
+            );
+            productCartRepository.save(productCart);
+        }catch (RuntimeException r) {
+            throw new RuntimeException("Error al procesar la solicitud.!");
+        }
+
+    }
+
+    //Remover producto del carrito
+
+    //Actualizar producto del carrito
+
+
+
+}

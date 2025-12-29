@@ -1,7 +1,6 @@
 package com.E_Commerce.Product_services.services;
 
 import com.E_Commerce.Product_services.exception.ResourceNotFoundExceptions;
-import com.E_Commerce.Product_services.model.dto.CategoryRequest;
 import com.E_Commerce.Product_services.model.dto.ProductResponse;
 import com.E_Commerce.Product_services.model.dto.ProductRequest;
 import com.E_Commerce.Product_services.model.entity.Category;
@@ -47,6 +46,16 @@ public class ProductServices {
     @Cacheable(value = "productsById", key = "#id")
     public ProductResponse getByIdProduct(Long id) throws ResourceNotFoundExceptions {
         Product product = productRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundExceptions("Producto no encotrado")
+        );
+
+        return util.toProductResponse(product);
+    }
+
+    //Obtener producto por codigo
+    @Cacheable(value = "productsBycode", key = "#code")
+    public ProductResponse getProductByCode(String code) throws ResourceNotFoundExceptions {
+        Product product = productRepository.findProductByCode(code).orElseThrow(
                 () -> new ResourceNotFoundExceptions("Producto no encotrado")
         );
 

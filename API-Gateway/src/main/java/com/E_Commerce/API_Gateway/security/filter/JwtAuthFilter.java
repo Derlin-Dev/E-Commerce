@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -32,20 +31,20 @@ public class JwtAuthFilter implements GlobalFilter , Ordered {
         this.securityRules = securityRules;
     }
 
-    private static final List<String> PUBLIC_ROUTES = List.of(
-            "/e-commerce/api/v1/auth/login",
-            "/e-commerce/api/v1/auth/signup",
-            "/e-commerce/api/v1/product/get",
-            "/e-commerce/api/v1/category/get",
-            "/e-commerce/api/v1/category/getproductbycategory"
-    );
-
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-    private boolean isPublicRoute(String path) {
-        return PUBLIC_ROUTES.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-    }
+//    private static final List<String> PUBLIC_ROUTES = List.of(
+//            "/e-commerce/api/v1/auth/login",
+//            "/e-commerce/api/v1/auth/signup",
+//            "/e-commerce/api/v1/product/get",
+//            "/e-commerce/api/v1/category/get",
+//            "/e-commerce/api/v1/category/getproductbycategory"
+//    );
+//
+//    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+//
+//    private boolean isPublicRoute(String path) {
+//        return PUBLIC_ROUTES.stream()
+//                .anyMatch(pattern -> pathMatcher.match(pattern, path));
+//    }
 
 
     @Override
@@ -71,7 +70,7 @@ public class JwtAuthFilter implements GlobalFilter , Ordered {
         try {
             jwtUtil.validateToken(token);
 
-            String userId = jwtUtil.extractUserId(token);
+            String userCode = jwtUtil.extractUserCode(token);
             List<String> roles = jwtUtil.extractRoles(token);
 
             decision = securityRules.evaluate(path, method, roles);
@@ -82,13 +81,13 @@ public class JwtAuthFilter implements GlobalFilter , Ordered {
 
             ServerHttpRequest mutateRequest = exchange.getRequest()
                     .mutate()
-                    .header("X-User-Id", userId)
+                    .header("X-User-Code", userCode)
                     .header("X-User-Roles", String.join(",", roles))
                     .build();
 
             return chain.filter(exchange.mutate().request(mutateRequest).build());
         } catch (JwtException e) {
-            return unauthorized(exchange, e.getMessage() + "AQUI");
+            return unauthorized(exchange, e.getMessage());
         }
     }
 

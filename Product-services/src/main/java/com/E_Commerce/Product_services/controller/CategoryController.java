@@ -1,5 +1,6 @@
 package com.E_Commerce.Product_services.controller;
 
+import com.E_Commerce.Product_services.exception.ResourceNotFoundExceptions;
 import com.E_Commerce.Product_services.model.dto.CategoryRequest;
 import com.E_Commerce.Product_services.services.CategoryServices;
 import org.springframework.http.HttpStatus;
@@ -17,16 +18,16 @@ public class CategoryController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<?> getAllCategory(){
-        return null;
+    public ResponseEntity<?> getAllCategory() throws ResourceNotFoundExceptions {
+        return ResponseEntity.ok(categoryServices.getAllCategory());
     }
 
-    @GetMapping("/getproductbycategory")
-    public ResponseEntity<?> getProductByCategory(){
-        return null;
+    @GetMapping("/getproduct/{id_category}")
+    public ResponseEntity<?> getProductByCategory(@PathVariable Long id_category) throws ResourceNotFoundExceptions {
+        return ResponseEntity.ok(categoryServices.getByCategoryProduct(id_category));
     }
 
-    @PostMapping("/newCategory")
+    @PostMapping("/new")
     public ResponseEntity<?> crearteCategory(@RequestBody CategoryRequest request){
         try {
             categoryServices.createNewCategory(request);

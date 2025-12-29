@@ -10,5 +10,4 @@ public record AccessRule(
         String path,
         List<String> roles
 
-)
-{ }
+) { }
