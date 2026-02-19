@@ -1,7 +1,10 @@
 package com.E_Commerce.Cart_services.util;
 
+import org.springframework.context.annotation.Configuration;
+
 import java.security.SecureRandom;
 
+@Configuration
 public class ShoppingCartUtil {
 
     private static final String CHARACTERES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

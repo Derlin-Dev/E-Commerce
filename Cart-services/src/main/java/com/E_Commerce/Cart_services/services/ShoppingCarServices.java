@@ -22,8 +22,9 @@ public class ShoppingCarServices {
     private final RestTemplate restTemplate;
     private final ShoppingCartUtil shoppingCartUtil;
 
-    private static String PRODUCT_SERVICE_GET = "https://PRODUCT-SERVICES/e-commerce/api/v1/product/getcode/";
+    private static String PRODUCT_SERVICE_GET = "http://Product-services/e-commerce/api/v1/product/getcode/{code}";
 
+    //Constructor
     public ShoppingCarServices(ShoppingCartRepository shoppingCartRepository, ProductCartRepository productCartRepository,
                                RestTemplate restTemplate, ShoppingCartUtil shoppingCartUtil)
     {
@@ -38,26 +39,28 @@ public class ShoppingCarServices {
         Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findByUserCode(userCode);
 
         if (shoppingCart.isEmpty()){
-            ShoppingCart sh = createNewShoppingCart(userCode);
-            return shoppingCartConvert(sh);
+            return createNewShoppingCart(userCode);
         }
 
         return shoppingCartConvert(shoppingCart.get());
     }
 
-    public ShoppingCartResponse shoppingCartConvert(ShoppingCart sh){
-        return new ShoppingCartResponse(
-                sh.getUserCode(),
-                sh.getCartCode(),
-                sh.getStatus(),
-                sh.getCreateAt(),
-                sh.getUpdateAt(),
-                sh.getProductCartList()
+    public ShoppingCartResponse shoppingCartConvert(ShoppingCart cart){
+
+        ShoppingCartResponse response = new ShoppingCartResponse(
+                cart.getUserCode(),
+                cart.getCartCode(),
+                cart.getStatus(),
+                cart.getCreateAt(),
+                cart.getUpdateAt(),
+                cart.getProductCartList()
         );
+        
+        return response;
     }
 
     //Crear nuevo carrito de compras
-    public ShoppingCart createNewShoppingCart(String userCode) throws Exception {
+    public ShoppingCartResponse createNewShoppingCart(String userCode) throws Exception {
 
         if (shoppingCartRepository.existsByUserCode(userCode)) {
             throw new Exception("Carrito ya registrado");
@@ -65,24 +68,20 @@ public class ShoppingCarServices {
 
         String cartCode = shoppingCartUtil.generateShoppingCartCode("CART-");
 
-        ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setUserCode(userCode);
-        shoppingCart.setCartCode(cartCode);
-        shoppingCart.setStatus(StatusCart.ACTIVE);
-        shoppingCart.setCreateAt(LocalDate.now());
-
-        return shoppingCartRepository.save(shoppingCart);
+        ShoppingCart shoppingCart =
+                new ShoppingCart(userCode, cartCode, StatusCart.ACTIVE, LocalDate.now(), LocalDate.now());
+        return shoppingCartConvert(shoppingCartRepository.save(shoppingCart));
     }
 
 
     //Obtener el item del servicio de productos
     public ProductRequest getProductByCode(String code){
-        String url = PRODUCT_SERVICE_GET + code;
-        return restTemplate.getForObject(url, ProductRequest.class);
+        String url = PRODUCT_SERVICE_GET ;
+        return restTemplate.getForObject(url, ProductRequest.class, code);
     }
 
     //Agregar producto al carrito
-    public void addItem(String cartCode, String productCode, int quantity){
+    public String addItem(String cartCode, String productCode, int quantity){
 
         ShoppingCart shoppingCart = shoppingCartRepository.findByCartCode(cartCode)
                 .orElseThrow(() -> new RuntimeException("Carrito no encotrado"));
@@ -105,6 +104,7 @@ public class ShoppingCarServices {
                     shoppingCart
             );
             productCartRepository.save(productCart);
+            return "Producto agregado correctamente";
         }catch (RuntimeException r) {
             throw new RuntimeException("Error al procesar la solicitud.!");
         }
@@ -112,9 +112,22 @@ public class ShoppingCarServices {
     }
 
     //Remover producto del carrito
+    public ShoppingCart removeItemCart(String codeCar, String cadeUser, String codeProduct){
+
+        ShoppingCart shoppingCart = shoppingCartRepository.findByCartCode(codeCar)
+                .orElseThrow(() -> new RuntimeException("Carrito no encotrado"));
+
+        if(!shoppingCart.getUserCode().equals(cadeUser)) throw new RuntimeException("El Carrito no pertenese al usuario");
+
+        boolean remove = shoppingCart.getProductCartList()
+                .removeIf(p -> p.getProductCode().equals(codeProduct));
+
+        if (!remove) throw new RuntimeException("Producto no encontrado");
+
+        return shoppingCartRepository.save(shoppingCart);
+
+    }
 
     //Actualizar producto del carrito
-
-
 
 }

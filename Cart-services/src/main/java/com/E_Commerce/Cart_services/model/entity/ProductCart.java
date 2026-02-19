@@ -1,5 +1,6 @@
 package com.E_Commerce.Cart_services.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class ProductCart {
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
+    @JsonIgnore
     private ShoppingCart shoppingCart;
 
     public ProductCart(

@@ -33,10 +33,11 @@ public class ShoppingCart {
     @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCart> productCartList;
 
-    public ShoppingCart(String userCode, String cartCode, StatusCart status, LocalDate createAt) {
+    public ShoppingCart(String userCode, String cartCode, StatusCart status, LocalDate createAt, LocalDate udateAT) {
         this.userCode = userCode;
         this.cartCode = cartCode;
         this.status = status;
         this.createAt = createAt;
+        this.updateAt = udateAT;
     }
 }

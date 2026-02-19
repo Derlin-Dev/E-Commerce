@@ -26,7 +26,11 @@ public class SecurityRules {
 
             //Product-services /category
             new AccessRule(HttpMethod.GET, "/e-commerce/api/v1/category/**", null),
-            new AccessRule(HttpMethod.POST, "/e-commerce/api/v1/category/**", List.of("ADMIN"))
+            new AccessRule(HttpMethod.POST, "/e-commerce/api/v1/category/**", List.of("ADMIN")),
+
+            //ShoppingCart-services /
+            new AccessRule(HttpMethod.GET, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER")),
+            new AccessRule(HttpMethod.POST, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER"))
 
     );
 
