@@ -1,60 +1,184 @@
 package com.E_Commerce.User_services.services;
 
+import com.E_Commerce.User_services.config.JwtUtil;
 import com.E_Commerce.User_services.model.dto.UserRequest;
+import com.E_Commerce.User_services.model.entity.TokenTemp;
+import com.E_Commerce.User_services.model.entity.TypeToken;
 import com.E_Commerce.User_services.model.entity.User;
+import com.E_Commerce.User_services.repository.TokenTempRepository;
 import com.E_Commerce.User_services.repository.UserRepository;
 import com.E_Commerce.User_services.ulti.UserUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServices {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final UserRepository repository;
+    private final UserRepository userrepository;
+    private final SendEmailServices sendEmailServices;
+    private final TokenTempRepository tokenTempRepository;
     private UserUtil userUtil;
+    private final JwtUtil jwtUtil;
 
     List<String> roles;
 
-    public UserServices(PasswordEncoder passwordEncoder, UserRepository repository, UserUtil userUtil) {
+    public UserServices(PasswordEncoder passwordEncoder, UserRepository repository, SendEmailServices sendEmailServices, TokenTempRepository tokenTempRepository, UserUtil userUtil, JwtUtil jwtUtil) {
         this.passwordEncoder = passwordEncoder;
-        this.repository = repository;
+        this.userrepository = repository;
+        this.sendEmailServices = sendEmailServices;
+        this.tokenTempRepository = tokenTempRepository;
         this.userUtil = userUtil;
-    }
-
-    //Obtener un usuario por su correo
-    public User getUser(String correo){
-        return repository.findByCorreo(correo);
+        this.jwtUtil = jwtUtil;
     }
 
     //Crear nuevo usuario
-    public User createNewUser(UserRequest request) throws UsernameNotFoundException {
+    public void createNewUser(UserRequest request) throws UsernameNotFoundException {
 
         roles = new ArrayList<>();
+        User userVerified = userrepository.findByCorreo(request.getCorreo());
+        TokenTemp tokenTempVerified = new TokenTemp();
 
-        if (repository.findByCorreo(request.getCorreo()) != null){
-            throw new UsernameNotFoundException("Correo ya registrado");
+        if (userVerified != null){
+            if (userVerified.isVerified()) {
+                throw new UsernameNotFoundException("Correo ya registrado y verificado");
+            }
+            else {
+                tokenTempRepository.invalidateActiveToken(userVerified, TypeToken.VERIFY_EMAIL);
+
+                String verifiedToken = userUtil.generateVerifiedCode();
+                String tokenHash = passwordEncoder.encode(verifiedToken);
+
+                tokenTempVerified.setUser(userVerified);
+                tokenTempVerified.setTokenHash(tokenHash);
+                tokenTempVerified.setTypeToken(TypeToken.VERIFY_EMAIL);
+
+                tokenTempRepository.save(tokenTempVerified);
+                sendEmailServices.sendVerifiedEmail(request.getCorreo(), verifiedToken);
+            }
         }
 
         roles.add(request.getRol());
         request.setPassword(passwordEncoder.encode(request.getPassword()));
-
         String code = userUtil.generateCodeUser("USER-");
+        String verifiedToken = userUtil.generateVerifiedCode();
+        String tokenHash = passwordEncoder.encode(verifiedToken);
 
         User user = new User(
                 code,
                 request.getName(),
                 request.getCorreo(),
                 request.getPassword(),
+                false,
                 roles
         );
 
-        return repository.save(user);
+        TokenTemp tokenTemp = new TokenTemp(
+          tokenHash,
+          TypeToken.VERIFY_EMAIL,
+          user
+        );
+
+        userrepository.save(user);
+        tokenTempRepository.save(tokenTemp);
+
+        sendEmailServices.sendVerifiedEmail(request.getCorreo(), verifiedToken);
+    }
+
+    public boolean isVerifiedToken(String email, String token, TypeToken typeToken ){
+        try {
+            User user = userrepository.findByCorreo(email);
+
+            Optional<TokenTemp> storeToken = tokenTempRepository.findByUserAndTypeTokenAndIsUsedFalse(user, typeToken);
+
+            if (user == null || storeToken.isEmpty()) {
+                throw new RuntimeException("Usuario o Token no encontrado");
+            }
+
+            if (!passwordEncoder.matches(token, storeToken.get().getTokenHash())) {
+                throw new RuntimeException("Token no coincide");
+            }
+
+            if (storeToken.get().isUsed()){
+                throw new RuntimeException("Token ya fue utilizado");
+            }
+
+            if (!storeToken.get().getTypeToken().equals(typeToken)) {
+                throw new RuntimeException("Tipo de token no valido");
+            }
+
+            if (storeToken.get().getTypeToken() == TypeToken.VERIFY_EMAIL){
+                isVerifiedUser(user, storeToken.orElse(null));
+            }
+
+            return true;
+
+        }catch (RuntimeException e){
+            throw new RuntimeException("Error al verificar usuario");
+        }
+
+    }
+
+    public void isVerifiedUser(User user, TokenTemp storeToken){
+        user.setVerified(true);
+        storeToken.setUsed(true);
+        userrepository.save(user);
+        tokenTempRepository.save(storeToken);
+    }
+
+    @Transactional
+    public void requestResetPassword(String email){
+
+        User user = userrepository.findByCorreo(email);
+
+        tokenTempRepository.invalidateActiveToken(user, TypeToken.RESET_PASSWORD);
+
+        if (user == null){
+            throw new UsernameNotFoundException("Usuario no encontrado");
+        }
+
+        String token = userUtil.generateVerifiedCode();
+        String tokenHash = passwordEncoder.encode(token);
+
+        TokenTemp tokenTemp = new TokenTemp();
+
+        tokenTemp.setUser(user);
+        tokenTemp.setTypeToken(TypeToken.RESET_PASSWORD);
+        tokenTemp.setTokenHash(tokenHash);
+
+        tokenTempRepository.save(tokenTemp);
+
+        sendEmailServices.sendResetEmail(email, token);
+    }
+
+    public void resetPassword(String email, String token, String newPassword){
+
+        if (isVerifiedToken(email, token, TypeToken.RESET_PASSWORD)){
+
+            String newPasswordHash = passwordEncoder.encode(newPassword);
+
+            User user = userrepository.findByCorreo(email);
+            user.setPassword(newPasswordHash);
+
+            Optional<TokenTemp> storeToken = tokenTempRepository.findByUserAndTypeTokenAndIsUsedFalse(
+                    user, TypeToken.RESET_PASSWORD);
+
+            TokenTemp tokenTemp = storeToken.get();
+            tokenTemp.setUsed(true);
+
+            tokenTempRepository.save(tokenTemp);
+            userrepository.save(user);
+
+        }else {
+            throw new RuntimeException("Error al validar token");
+        }
+
     }
 }

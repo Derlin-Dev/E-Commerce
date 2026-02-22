@@ -1,8 +1,7 @@
 package com.E_Commerce.User_services.controller;
 
-import com.E_Commerce.User_services.model.dto.AuthenticationRequest;
-import com.E_Commerce.User_services.model.dto.AuthenticationResponses;
-import com.E_Commerce.User_services.model.dto.UserRequest;
+import com.E_Commerce.User_services.model.dto.*;
+import com.E_Commerce.User_services.model.entity.TypeToken;
 import com.E_Commerce.User_services.model.entity.User;
 import com.E_Commerce.User_services.services.AuthServices;
 import com.E_Commerce.User_services.services.UserServices;
@@ -29,9 +28,42 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registreNewUser(@RequestBody UserRequest request){
-        User user = userServices.createNewUser(request);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+    public ResponseEntity<?> registerNewUser(@RequestBody UserRequest request){
+        userServices.createNewUser(request);
+        return ResponseEntity.status(HttpStatus.OK).body("Usuario registrado, verifica un correo.");
+    }
+
+    @GetMapping("/verified-user")
+    public ResponseEntity<?> verifiedValidationEmailToken(
+            @RequestParam("token") String token,
+            @RequestParam("email") String email){
+        try{
+            userServices.isVerifiedToken(email, token, TypeToken.VERIFY_EMAIL);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Usuario verificado correctamente...");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al validar el usuario");
+        }
+    }
+
+    @GetMapping("/verified-resettoken")
+    public ResponseEntity<?> verifiedResetPasswordToken(
+            @RequestParam("token") String toke,
+            @RequestParam("email") String email){
+
+        userServices.isVerifiedToken(email, toke, TypeToken.RESET_PASSWORD);
+        return ResponseEntity.ok().body("Token verificado");
+    }
+
+    @GetMapping("/request-change")
+    public ResponseEntity<?> requestChangePassword(@RequestBody EmailChangeRequest emailChangeRequest){
+        userServices.requestResetPassword(emailChangeRequest.getEmail());
+        return ResponseEntity.ok().body("Correo enviado");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changeNewPassword(@RequestBody ResetNewPasswordRequest newPasswordRequest){
+        userServices.resetPassword(newPasswordRequest.getEmail(), newPasswordRequest.getToken(), newPasswordRequest.getNewPassword());
+        return ResponseEntity.status(HttpStatus.CREATED).body("Contrasena cambiada correctamente");
     }
 
 }

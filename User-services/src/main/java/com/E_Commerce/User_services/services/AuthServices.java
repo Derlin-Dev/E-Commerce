@@ -33,7 +33,11 @@ public class AuthServices {
             throw new RuntimeException("Credenciales invalidas");
         }
 
-        String token = jwtUtil.createToken(user.getUserCode(), user.getRoles());
+        if (!user.isVerified()){
+            throw new RuntimeException("Usuario no a sido validado");
+        }
+
+        String token = jwtUtil.createLoginToken(user.getUserCode(), user.getRoles());
 
         return new AuthenticationResponses(
                 token,

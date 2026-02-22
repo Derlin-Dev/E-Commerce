@@ -23,14 +23,17 @@ public class User {
     private String name;
     private String correo;
     private String password;
+    private boolean isVerified;
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
 
-    public User(String userCode, String name, String correo, String password, List<String> roles) {
+
+    public User(String userCode, String name, String correo, String password, boolean isVerified, List<String> roles) {
         this.userCode = userCode;
         this.name = name;
         this.correo = correo;
         this.password = password;
+        this.isVerified = isVerified;
         this.roles = roles;
     }
 }

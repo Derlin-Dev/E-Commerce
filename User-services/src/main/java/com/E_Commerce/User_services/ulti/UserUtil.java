@@ -3,6 +3,7 @@ package com.E_Commerce.User_services.ulti;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
+import java.util.Base64;
 
 @Component
 public class UserUtil {
@@ -20,6 +21,16 @@ public class UserUtil {
         }
 
         return code.toString();
+    }
+
+    public String generateVerifiedCode(){
+
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] bytes = new byte[32];
+        secureRandom.nextBytes(bytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+
+        return token;
     }
 
 }
