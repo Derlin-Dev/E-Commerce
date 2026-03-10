@@ -129,5 +129,24 @@ public class ShoppingCarServices {
     }
 
     //Actualizar producto del carrito
+    public void updatePricesItem(){
 
+    }
+
+    //Actualizar cantidad del producto del carrito
+    public void updateQuantityItem(String codeCar, String codeProduct, int newQuantity) throws RuntimeException{
+
+        ShoppingCart shoppingCart = shoppingCartRepository.findByCartCode(codeCar)
+                .orElseThrow( () -> new RuntimeException("Carrito no encotrado"));
+
+        ProductCart productCart = shoppingCart.getProductCartList()
+                .stream()
+                .filter(p -> p.getProductCode().equals(codeProduct))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Proudcto no encotrado en el carrito"));
+
+        productCart.setQuantity(newQuantity);
+
+        shoppingCartRepository.save(shoppingCart);
+    }
 }
