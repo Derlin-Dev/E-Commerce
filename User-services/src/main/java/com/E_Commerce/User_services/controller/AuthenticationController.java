@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 @RestController
 @RequestMapping("/e-commerce/api/v1/auth")
 public class AuthenticationController {
@@ -45,6 +46,12 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping("/request-change")
+    public ResponseEntity<?> requestChangePassword(@RequestBody EmailChangeRequest emailChangeRequest){
+        userServices.requestResetPassword(emailChangeRequest.getEmail());
+        return ResponseEntity.ok().body("Correo enviado");
+    }
+
     @GetMapping("/verified-resettoken")
     public ResponseEntity<?> verifiedResetPasswordToken(
             @RequestParam("token") String toke,
@@ -52,12 +59,6 @@ public class AuthenticationController {
 
         userServices.isVerifiedToken(email, toke, TypeToken.RESET_PASSWORD);
         return ResponseEntity.ok().body("Token verificado");
-    }
-
-    @GetMapping("/request-change")
-    public ResponseEntity<?> requestChangePassword(@RequestBody EmailChangeRequest emailChangeRequest){
-        userServices.requestResetPassword(emailChangeRequest.getEmail());
-        return ResponseEntity.ok().body("Correo enviado");
     }
 
     @PostMapping("/change-password")

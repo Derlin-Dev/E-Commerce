@@ -37,7 +37,7 @@ public class AuthServices {
             throw new RuntimeException("Usuario no a sido validado");
         }
 
-        String token = jwtUtil.createLoginToken(user.getUserCode(), user.getRoles());
+        String token = jwtUtil.createLoginToken(user.getUserCode(), user.getRol());
 
         return new AuthenticationResponses(
                 token,

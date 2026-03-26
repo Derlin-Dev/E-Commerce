@@ -2,6 +2,7 @@ package com.E_Commerce.User_services.services;
 
 import com.E_Commerce.User_services.config.JwtUtil;
 import com.E_Commerce.User_services.model.dto.UserRequest;
+import com.E_Commerce.User_services.model.entity.Roles;
 import com.E_Commerce.User_services.model.entity.TokenTemp;
 import com.E_Commerce.User_services.model.entity.TypeToken;
 import com.E_Commerce.User_services.model.entity.User;
@@ -65,7 +66,10 @@ public class UserServices {
             }
         }
 
-        roles.add(request.getRol());
+        String role = "";
+        if (request.getRol().equals("ADMIN")) role = String.valueOf(Roles.ADMIN);
+        if (request.getRol().equals("USER")) role = String.valueOf(Roles.USER);
+
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         String code = userUtil.generateCodeUser("USER-");
         String verifiedToken = userUtil.generateVerifiedCode();
@@ -77,7 +81,7 @@ public class UserServices {
                 request.getCorreo(),
                 request.getPassword(),
                 false,
-                roles
+                role
         );
 
         TokenTemp tokenTemp = new TokenTemp(
@@ -92,6 +96,7 @@ public class UserServices {
         sendEmailServices.sendVerifiedEmail(request.getCorreo(), verifiedToken);
     }
 
+    //Verificar que el token esa correcto
     public boolean isVerifiedToken(String email, String token, TypeToken typeToken ){
         try {
             User user = userrepository.findByCorreo(email);
@@ -126,6 +131,7 @@ public class UserServices {
 
     }
 
+    //Verificamos el usuario
     public void isVerifiedUser(User user, TokenTemp storeToken){
         user.setVerified(true);
         storeToken.setUsed(true);
@@ -133,31 +139,33 @@ public class UserServices {
         tokenTempRepository.save(storeToken);
     }
 
+    //Solisitamos reseteo de contrasena
     @Transactional
     public void requestResetPassword(String email){
 
         User user = userrepository.findByCorreo(email);
 
-        tokenTempRepository.invalidateActiveToken(user, TypeToken.RESET_PASSWORD);
+        if (user != null){
+            tokenTempRepository.invalidateActiveToken(user, TypeToken.RESET_PASSWORD);
 
-        if (user == null){
+            String token = userUtil.generateVerifiedCode();
+            String tokenHash = passwordEncoder.encode(token);
+
+            TokenTemp tokenTemp = new TokenTemp();
+
+            tokenTemp.setUser(user);
+            tokenTemp.setTypeToken(TypeToken.RESET_PASSWORD);
+            tokenTemp.setTokenHash(tokenHash);
+
+            tokenTempRepository.save(tokenTemp);
+
+            sendEmailServices.sendResetEmail(email, token);
+        }else {
             throw new UsernameNotFoundException("Usuario no encontrado");
         }
-
-        String token = userUtil.generateVerifiedCode();
-        String tokenHash = passwordEncoder.encode(token);
-
-        TokenTemp tokenTemp = new TokenTemp();
-
-        tokenTemp.setUser(user);
-        tokenTemp.setTypeToken(TypeToken.RESET_PASSWORD);
-        tokenTemp.setTokenHash(tokenHash);
-
-        tokenTempRepository.save(tokenTemp);
-
-        sendEmailServices.sendResetEmail(email, token);
     }
 
+    //Reseteamos la contrasena
     public void resetPassword(String email, String token, String newPassword){
 
         if (isVerifiedToken(email, token, TypeToken.RESET_PASSWORD)){

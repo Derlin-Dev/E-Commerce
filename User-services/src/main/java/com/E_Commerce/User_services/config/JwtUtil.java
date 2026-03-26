@@ -1,7 +1,7 @@
 package com.E_Commerce.User_services.config;
 
+import com.E_Commerce.User_services.model.entity.Roles;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -21,10 +21,10 @@ public class JwtUtil {
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;// 10 horas
     private static final long EXPIRATION_VERIFIED_TIME = 1000 * 60 * 20;
 
-    public String createLoginToken(String userId, List<String> roles) {
+    public String createLoginToken(String userId, String rol) {
         return Jwts.builder()
                 .subject(userId)
-                .claim("roles", roles)
+                .claim("roles", rol)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

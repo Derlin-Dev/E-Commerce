@@ -23,6 +23,7 @@ public class UserUtil {
         return code.toString();
     }
 
+    //Generar token de verificacion y reseteo de contrasena
     public String generateVerifiedCode(){
 
         SecureRandom secureRandom = new SecureRandom();

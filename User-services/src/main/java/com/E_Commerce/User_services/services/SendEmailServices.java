@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class SendEmailServices {
@@ -15,6 +16,9 @@ public class SendEmailServices {
 
     @Value("${spring.mail.username}")
     private String from;
+
+    @Value("${app.gateway.url}")
+    private String gatewayUrl;
 
     public SendEmailServices(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -30,7 +34,7 @@ public class SendEmailServices {
 
     public void sendResetEmail(String email, String verifiedToken){
         String subJect = "Email de recuperacion";
-        String path = "/e-commerce/api/v1/auth//verified-resettoken";
+        String path = "/e-commerce/api/v1/auth/verified-resettoken";
         String messege = "Clic en el boton o copia el link";
 
         sendEmail(email, verifiedToken, subJect, path, messege);
@@ -38,7 +42,7 @@ public class SendEmailServices {
 
     public void sendEmail(String email,String token, String subject, String path, String messege){
         try{
-            String actionUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+            String actionUrl = UriComponentsBuilder.fromHttpUrl(gatewayUrl)
                     .path(path)
                     .queryParam("token", token)
                     .queryParam("email", email)
