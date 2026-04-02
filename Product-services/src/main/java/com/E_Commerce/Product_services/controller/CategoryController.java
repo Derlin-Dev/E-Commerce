@@ -17,14 +17,17 @@ public class CategoryController {
         this.categoryServices = categoryServices;
     }
 
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<?> getAllCategory() throws ResourceNotFoundExceptions {
         return ResponseEntity.ok(categoryServices.getAllCategory());
     }
 
-    @GetMapping("/getproduct/{id_category}")
-    public ResponseEntity<?> getProductByCategory(@PathVariable Long id_category) throws ResourceNotFoundExceptions {
-        return ResponseEntity.ok(categoryServices.getByCategoryProduct(id_category));
+    @GetMapping("/id/{categoryId}/products")
+    public ResponseEntity<?> getProductByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ResourceNotFoundExceptions {
+        return ResponseEntity.ok(categoryServices.getCategoryWithProductsPaged(categoryId, page, size));
     }
 
     @PostMapping("/new")

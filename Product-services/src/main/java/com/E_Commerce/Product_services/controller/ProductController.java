@@ -21,22 +21,38 @@ public class ProductController {
         this.productServices = productServices;
     }
 
-    //obtener todos los productos
     @GetMapping("/get")
-    public ResponseEntity<?> getProducts(){
-        List<ProductResponse> productResponses = productServices.getAllProduct();
-        return ResponseEntity.status(HttpStatus.OK).body(productResponses);
+    public ResponseEntity<?> searchProduct(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    )
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(productServices.searchProductFilter(
+                search, categoryName, minPrice, maxPrice, page, size
+        ));
+    }
+    //obtener todos los productos
+    @GetMapping()
+    public ResponseEntity<?> getProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+
+        return ResponseEntity.status(HttpStatus.OK).body(productServices.getAllProducts(page, size));
     }
 
     //Obtener productos por su id
-    @GetMapping("/get/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<ProductResponse>getByIdProduct(@PathVariable Long id) throws ResourceNotFoundExceptions {
         ProductResponse response = productServices.getByIdProduct(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     //Obtener producto por codigo
-    @GetMapping("/getcode/{code}")
+    @GetMapping("/code/{code}")
     public ResponseEntity<ProductResponse> getByProductCode(@PathVariable String code) throws  ResourceNotFoundExceptions {
         ProductResponse response = productServices.getProductByCode(code);
         return ResponseEntity.status(HttpStatus.OK).body(response);

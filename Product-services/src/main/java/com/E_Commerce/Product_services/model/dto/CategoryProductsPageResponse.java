@@ -1,4 +1,5 @@
 package com.E_Commerce.Product_services.model.dto;
+import org.springframework.data.domain.Page;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,11 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductResponse {
+public class CategoryProductsPageResponse {
     private String code;
-    private String name;
-    private double price;
-    private String descripcion;
-    private int stock;
+    private String nameCategory;
+    private PageResponse<ProductResponse> products;
 
 }
