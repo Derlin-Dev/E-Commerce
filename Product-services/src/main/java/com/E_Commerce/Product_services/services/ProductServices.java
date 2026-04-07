@@ -30,7 +30,7 @@ public class ProductServices {
         this.categoryRepository = categoryRepository;
     }
 
-    //@Cacheable(value = "product", key = "'search=' + #search + ',categoryName=' + #categoryName + ',minPrice=' + #minPrice + ',maxPrice=' + #maxPrice + ',page=' + #page + ',size=' + #size")
+    @Cacheable(value = "product", key = "'search=' + #search + ',categoryName=' + #categoryName + ',minPrice=' + #minPrice + ',maxPrice=' + #maxPrice + ',page=' + #page + ',size=' + #size")
     public PageResponse<ProductResponse> searchProductFilter(
             String search, String categoryName, Double minPrice, Double maxPrice, int page, int size){
 
