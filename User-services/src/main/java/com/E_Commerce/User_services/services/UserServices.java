@@ -41,6 +41,7 @@ public class UserServices {
     }
 
     //Crear nuevo usuario
+    @Transactional
     public void createNewUser(UserRequest request) throws UsernameNotFoundException {
 
         roles = new ArrayList<>();

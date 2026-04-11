@@ -32,8 +32,11 @@ public class SecurityRules {
             //ShoppingCart-services /
             new AccessRule(HttpMethod.GET, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER")),
             new AccessRule(HttpMethod.POST, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER")),
-            new AccessRule(HttpMethod.DELETE, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER"))
+            new AccessRule(HttpMethod.DELETE, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER")),
+            new AccessRule(HttpMethod.PUT, "/e-commerce/api/v1/shoppingcart/**", List.of("ADMIN", "USER")),
 
+            //Orders-Servise /
+            new AccessRule(HttpMethod.POST, "/e-commerce/api/v1/orders/**", List.of("ADMIN", "USER"))
     );
 
     public AccessDecision evaluate(String path, HttpMethod httpMethod, List<String> roles){

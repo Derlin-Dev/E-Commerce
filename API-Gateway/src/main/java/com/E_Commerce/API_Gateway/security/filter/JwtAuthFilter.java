@@ -31,22 +31,6 @@ public class JwtAuthFilter implements GlobalFilter , Ordered {
         this.securityRules = securityRules;
     }
 
-//    private static final List<String> PUBLIC_ROUTES = List.of(
-//            "/e-commerce/api/v1/auth/login",
-//            "/e-commerce/api/v1/auth/signup",
-//            "/e-commerce/api/v1/product/get",
-//            "/e-commerce/api/v1/category/get",
-//            "/e-commerce/api/v1/category/getproductbycategory"
-//    );
-//
-//    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-//
-//    private boolean isPublicRoute(String path) {
-//        return PUBLIC_ROUTES.stream()
-//                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-//    }
-
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
@@ -79,11 +63,13 @@ public class JwtAuthFilter implements GlobalFilter , Ordered {
                 return unauthorized(exchange, "Acceso denegado");
             }
 
-            ServerHttpRequest mutateRequest = exchange.getRequest()
+            ServerHttpRequest mutateRequest;
+            mutateRequest = exchange.getRequest()
                     .mutate()
                     .header("X-User-Code", userCode)
                     .header("X-User-Roles", String.join(",", roles))
                     .build();
+
 
             return chain.filter(exchange.mutate().request(mutateRequest).build());
         } catch (JwtException e) {

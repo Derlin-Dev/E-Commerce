@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,7 +32,7 @@ public class ShoppingCart {
     private LocalDate updateAt;
 
     @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductCart> productCartList;
+    private List<ProductCart> productCartList = new ArrayList<>();
 
     public ShoppingCart(String userCode, String cartCode, StatusCart status, LocalDate createAt, LocalDate udateAT) {
         this.userCode = userCode;

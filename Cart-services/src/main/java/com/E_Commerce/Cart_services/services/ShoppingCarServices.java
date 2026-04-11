@@ -1,6 +1,7 @@
 package com.E_Commerce.Cart_services.services;
 
 import com.E_Commerce.Cart_services.model.data.StatusCart;
+import com.E_Commerce.Cart_services.model.dto.ProductCartResponse;
 import com.E_Commerce.Cart_services.model.dto.ProductRequest;
 import com.E_Commerce.Cart_services.model.dto.ShoppingCartResponse;
 import com.E_Commerce.Cart_services.model.entity.ProductCart;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,7 +25,7 @@ public class ShoppingCarServices {
     private final RestTemplate restTemplate;
     private final ShoppingCartUtil shoppingCartUtil;
 
-    private static String PRODUCT_SERVICE_GET = "http://Product-services/e-commerce/api/v1/product/getcode/{code}";
+    private static String PRODUCT_SERVICE_GET = "http://Product-services/e-commerce/api/v1/product/code/{code}";
 
     //Constructor
     public ShoppingCarServices(ShoppingCartRepository shoppingCartRepository, ProductCartRepository productCartRepository,
@@ -46,16 +49,28 @@ public class ShoppingCarServices {
     }
 
     public ShoppingCartResponse shoppingCartConvert(ShoppingCart cart){
+        ShoppingCartResponse response = new ShoppingCartResponse();
+        response.setUserCode(cart.getUserCode());
+        response.setCartCode(cart.getCartCode());
+        response.setStatus(cart.getStatus());
+        response.setCreateAt(cart.getCreateAt());
+        response.setUpdateAt(cart.getUpdateAt());
 
-        ShoppingCartResponse response = new ShoppingCartResponse(
-                cart.getUserCode(),
-                cart.getCartCode(),
-                cart.getStatus(),
-                cart.getCreateAt(),
-                cart.getUpdateAt(),
-                cart.getProductCartList()
-        );
-        
+        List<ProductCartResponse> products = cart.getProductCartList()
+                .stream()
+                .map(p -> {
+                    ProductCartResponse dto = new ProductCartResponse();
+                    dto.setCode(p.getProductCode());
+                    dto.setName(p.getProductName());
+                    dto.setPrice(p.getUnitPrice());
+                    dto.setQuantity(p.getQuantity());
+                    dto.setSubTotal(p.getSubTotal());
+                    return dto;
+                })
+                .toList();
+
+        response.setProductCartList(products);
+
         return response;
     }
 
@@ -68,8 +83,10 @@ public class ShoppingCarServices {
 
         String cartCode = shoppingCartUtil.generateShoppingCartCode("CART-");
 
-        ShoppingCart shoppingCart =
-                new ShoppingCart(userCode, cartCode, StatusCart.ACTIVE, LocalDate.now(), LocalDate.now());
+        ShoppingCart shoppingCart = new ShoppingCart(
+                userCode, cartCode, StatusCart.ACTIVE, LocalDate.now(), LocalDate.now()
+        );
+
         return shoppingCartConvert(shoppingCartRepository.save(shoppingCart));
     }
 

@@ -63,6 +63,10 @@ public class JwtUtil {
     public List<String> extractRoles(String token) {
         Object roles = parseToken(token).get("roles");
 
+        if (roles instanceof String role) {
+            return List.of(role);
+        }
+
         if (roles instanceof List<?> roleList) {
             return roleList.stream()
                     .map(Object::toString)

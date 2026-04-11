@@ -59,7 +59,6 @@ public class ProductController {
     }
 
     //Crear un nuevo producto
-
     @PostMapping("/create")
     public ResponseEntity<?> registerNewProduct(@RequestBody ProductRequest request) throws ResourceNotFoundExceptions {
         Product product = productServices.createNewProduct(request);

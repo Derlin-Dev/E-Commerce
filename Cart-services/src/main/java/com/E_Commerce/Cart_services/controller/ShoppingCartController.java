@@ -18,8 +18,8 @@ public class ShoppingCartController {
         this.shoppingCarServices = shoppingCarServices;
     }
 
-    @GetMapping("/getshoppingcart/{usercode}")
-    public ResponseEntity<ShoppingCartResponse> getShoppingCart(@PathVariable("usercode") String userCode) throws Exception {
+    @GetMapping("/getshoppingcart")
+    public ResponseEntity<ShoppingCartResponse> getShoppingCart(@RequestHeader("X-User-Code") String userCode) throws Exception {
         ShoppingCartResponse shoppingCartResponse = shoppingCarServices.getShoppingCartByUser(userCode);
         return ResponseEntity.ok(shoppingCartResponse);
     }
@@ -42,17 +42,17 @@ public class ShoppingCartController {
             @PathVariable("codeCart") String codeCart,
             @PathVariable("codeItem") String codeItem,
             @RequestBody NewQuantityItemRequest newQuantityItemRequest
-            ){
+            )
+    {
 
             shoppingCarServices.updateQuantityItem(codeCart, codeItem, newQuantityItemRequest.getNewQuantity());
             return ResponseEntity.ok("Producto actualizado correctamente");
     }
 
-    @DeleteMapping("/delete/car/{codeCart}/product/{codeProduct}")
+    @DeleteMapping("/delete/{codeCart}/product/{codeProduct}")
     public  ResponseEntity<?> removeItemCart(@RequestHeader("X-User-Code") String userCode,
                                              @PathVariable String codeCart,
                                              @PathVariable String codeProduct){
-
 
         return ResponseEntity.ok( shoppingCarServices.removeItemCart(codeCart, userCode, codeProduct));
 

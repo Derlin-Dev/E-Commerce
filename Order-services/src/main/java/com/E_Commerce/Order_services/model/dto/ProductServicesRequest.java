@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderResponce {
-
-    private String orderCode;
-    private String userCode;
-    private double total;
-
+public class ProductServicesRequest {
+    private String code;
+    private String name;
+    private double price;
 }
