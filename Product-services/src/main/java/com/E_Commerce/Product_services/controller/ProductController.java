@@ -21,6 +21,7 @@ public class ProductController {
         this.productServices = productServices;
     }
 
+    //Busqueda con parametros
     @GetMapping("/get")
     public ResponseEntity<?> searchProduct(
             @RequestParam(required = false) String search,
@@ -35,6 +36,7 @@ public class ProductController {
                 search, categoryName, minPrice, maxPrice, page, size
         ));
     }
+
     //obtener todos los productos
     @GetMapping()
     public ResponseEntity<?> getProducts(
