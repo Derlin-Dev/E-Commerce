@@ -1,0 +1,86 @@
+services:
+  api-gateway:
+    build:
+      context: ./API-Gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8081:8081"
+    networks:
+      - e-commerce-network
+    restart: always
+
+  product-services:
+    build:
+      context: ./Product-services
+      dockerfile: Dockerfile
+    container_name: product-services
+    ports:
+      - "8082:8080"
+    networks:
+      - e-commerce-network
+    restart: always
+
+  user-services:
+    build:
+      context: ./User-services
+      dockerfile: Dockerfile
+    container_name: user-services
+    ports:
+      - "8083:8080"
+    networks:
+      - e-commerce-network
+    restart: always
+
+  cart-services:
+    build:
+      context: ./Cart-services
+      dockerfile: Dockerfile
+    container_name: cart-services
+    ports:
+      - "8084:8080"
+    networks:
+      - e-commerce-network
+    restart: always
+
+  order-services:
+    build:
+      context: ./Order-services
+      dockerfile: Dockerfile
+    container_name: order-services
+    ports:
+      - "8085:8080"
+    networks:
+      - e-commerce-network
+    restart: always
+
+  # payment-services:
+  #   build:
+  #     context: ./Payment-services
+  #     dockerfile: Dockerfile
+  #   container_name: payment-services
+  #   ports:
+  #     - "8086:8080"
+  #   networks:
+  #     - e-commerce-network
+  #   depends_on:
+  #     - discovery-server
+  #   restart: always
+
+  # notification-services:
+  #   build:
+  #     context: ./Notification-services
+  #     dockerfile: Dockerfile
+  #   container_name: notification-services
+  #   ports:
+  #     - "8087:8080"
+  #   networks:
+  #     - e-commerce-network
+  #   depends_on:
+  #     - discovery-server
+  #     - rabbitmq
+  #   restart: always
+
+networks:
+  e-commerce-network:
+    external: true

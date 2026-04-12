@@ -1,5 +1,6 @@
 package com.E_Commerce.User_services.controller;
 
+import com.E_Commerce.User_services.exception.ResourceNotFoundExceptions;
 import com.E_Commerce.User_services.model.dto.*;
 import com.E_Commerce.User_services.model.entity.TypeToken;
 import com.E_Commerce.User_services.model.entity.User;
@@ -22,7 +23,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest request){
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest request) throws ResourceNotFoundExceptions {
         final AuthenticationResponses responses = authServices.login(request);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }

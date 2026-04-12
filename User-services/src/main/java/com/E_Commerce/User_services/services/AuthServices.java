@@ -1,6 +1,7 @@
 package com.E_Commerce.User_services.services;
 
 import com.E_Commerce.User_services.config.JwtUtil;
+import com.E_Commerce.User_services.exception.ResourceNotFoundExceptions;
 import com.E_Commerce.User_services.model.dto.AuthenticationRequest;
 import com.E_Commerce.User_services.model.dto.AuthenticationResponses;
 import com.E_Commerce.User_services.model.entity.User;
@@ -21,20 +22,20 @@ public class AuthServices {
         this.jwtUtil = jwtUtil;
     }
 
-    public AuthenticationResponses login (AuthenticationRequest request) {
+    public AuthenticationResponses login (AuthenticationRequest request) throws ResourceNotFoundExceptions {
 
         User user = userRepository.findByCorreo(request.getCorreo());
 
         if (user == null) {
-            throw new RuntimeException("Usuario no encontrado");
+            throw new ResourceNotFoundExceptions("Usuario no encontrado");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            throw new RuntimeException("Credenciales invalidas");
+            throw new ResourceNotFoundExceptions("Credenciales invalidas");
         }
 
         if (!user.isVerified()){
-            throw new RuntimeException("Usuario no a sido validado");
+            throw new ResourceNotFoundExceptions("Usuario no a sido validado");
         }
 
         String token = jwtUtil.createLoginToken(user.getUserCode(), user.getRol());

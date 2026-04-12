@@ -1,0 +1,8 @@
+version: '3.8'
+
+# Este archivo unifica infraestructura y servicios
+# solo para referencia. Usa en su lugar:
+#   docker compose -f docker-compose.infra.yml -f docker-compose.services.yml up -d
+# 
+# O simplemente ejecuta: ./deploy.sh
+

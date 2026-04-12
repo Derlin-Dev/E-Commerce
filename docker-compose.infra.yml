@@ -1,0 +1,133 @@
+services:
+  postgres_product:
+    image: postgres:15
+    container_name: postgres_product
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: product_DB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_product_data:/var/lib/postgresql/data
+    networks:
+      - e-commerce-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d product_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_user:
+    image: postgres:15
+    container_name: postgres_user
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: user_DB
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - e-commerce-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d user_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_cart:
+    image: postgres:15
+    container_name: postgres_cart
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: shoppingcart_DB
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_cart_data:/var/lib/postgresql/data
+    networks:
+      - e-commerce-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d shoppingcart_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_order:
+    image: postgres:15
+    container_name: postgres_order
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: orders_DB
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+    networks:
+      - e-commerce-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d orders_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - e-commerce-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - e-commerce-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  discovery-server:
+    build:
+      context: ./Discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - e-commerce-network
+    restart: always
+
+volumes:
+  postgres_product_data:
+  postgres_user_data:
+  postgres_cart_data:
+  postgres_order_data:
+
+networks:
+  e-commerce-network:
+    external: true
